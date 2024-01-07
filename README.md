@@ -283,4 +283,43 @@ let threeOfSpades = Card(rank: .three, suit: .spades)
 let threeOfSpadesDescription = threeOfSpades.simpleDescription()
 ```
 
-- computed properties (not stored but computed)
+# Generics
+
+- Write a name inside angle brackets to make a generic function or type.
+
+```swift
+// functions
+func makeArray<Item>(repeating item: Item, numberOfTimes: Int) -> [Item] {
+    var result: [Item] = []
+
+    for _ in 0..<numberOfTimes {
+        result.append(item)
+    }
+
+    return result
+}
+
+makeArray(repeating: "knock", numberOfTimes: 4)
+```
+
+- Can make generic forms of functions and methods, as well as classes, enumerations, and structures.
+
+```swift
+// Reimplement the Swift standard library's optional type
+enum OptionalValue<Wrapped> {
+    case none
+    case some(Wrapped)
+}
+
+var possibleInteger: OptionalValue<Int> = .none
+possibleInteger = .some(100)
+```
+
+- Use `where` right before the body of the function to specify a list of requirements.
+
+```swift
+func anyCommonElements<T: Sequence, U: Sequence>(_ lhs: T, _ rhs: U) -> Bool
+    where T.Element: Equatable, T.Element == U.Element
+```
+
+- Note: find a better example and update docs.
