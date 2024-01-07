@@ -128,43 +128,159 @@ test.area()
 test.simpleDescription()
 ```
 
-# Structs?
-- properties
-- computed properties (not stored but computed)
-- initialization
-- methods
-
-- creating instances (named parameters & parameter defaults)
+- Properties can have getters and setters
 
 ```swift
-struct Note {
-    var scientificPitchNotation: string
+class Tiangle: Shape {
+    var sideLength: Double = 0.0
+
+    init(sideLength: Double, name: String) {
+        self.sideLength = sideLength
+        super.init(name: name)
+        numberOfSides = 3
+    }
+
+    var perimeter: Double {
+        get {
+            return 3.0 * sideLength
+        }
+        // the new value has the implicit name: newValue
+        // set(newValue: Double)
+        set {
+            sideLength = newValue / 3.0
+        }
+    }
+
+    override func simpleDescription() -> String {
+        return "A triangle with \(sideLength)"
+    }
+}
+
+var triangle = Triangle(sideLength: 3.1, name: "triangle")
+print(tiangle.perimeter) // prints 9.3
+
+triangle.perimeter = 9.9
+print(tiangle.perimeter) // prints ~ 3.3
+```
+
+- NOTE: Find a better for willSet example and update README.md
+
+- If you don't need to compute the property but still need to provide code that's run before and after setting a new value, use willSet and didSet.
+
+- The code you provide is run any time the value changes outside of an initializer.
+
+```swift
+class TriangleAndSquare {
+    var triangle: Triangle {
+        willSet { square.sideLength = newValue.sideLength }
+    }
+
+    var square: Square {
+        willSet { triangle.sideLength = newValue.sideLength }
+    }
+
+    init(size: Double, name: String) {
+        square = Square(sideLength: size, name: name)
+        triangle = Triangle(sideLength: size, name: name)
+    }
+}
+
+var triangleAndSquare = TriangleAndSquare(size: 10, name: "test")
+
+print(triangleAndSquare.square.sideLength) // prints 10
+print(triangleAndSquare.triangle.sideLength) // prints 10
+
+triangleAndSquare.square = Square(sideLength: 50, name: "larger square")
+print(triangleAndSquare.triangle.sideLength) // prints 50
+```
+
+# Optionals
+
+- Write `?` before operations like methods, properties, and subscripting.
+
+```swift
+let optionalSquare: Square?
+
+if optionalSquare != nil {
+    print("we have something to work with")
+} else {
+    print("nil")
 }
 ```
 
-# Protocols?
+# Enumerations and Structures
 
-# SwiftUI: View
+- Enumerations can have methods associated with them.
 
-- VStack takes Image and Text "stacks" the Views (VStack is a View that contains Image and Text)
+- By default, Swift assigns the raw value starting at zero and incrementing by one each time; can change this behavior by explicitly specifying values.
 
 ```swift
-import SwiftUI
+enum Rank: Int {
+    case ace = 1
+    case two, three, four, five, six, seven, eight, nine, ten
+    case jack, queen, king
 
-struct ContentView {
-    var body: some View {
-        // the braces following VStack(): { ... } is an embedded function (func passed as args to other "things")
-        // Returns something that behaves like a View.
-        // A post-processing step going on: Takes lists and packages them as a TupleView (a list of views)
-        // A func that returns a TupleView
-        VStack() {
-            Image(sytemName: "globe")
-                .imageScale(.large)
-                .forgroundColor(.orange)
-            Text("Hello World!")
+    func simpleDescription() -> String {
+        switch self {
+            case .ace:
+                return "ace"
+            case .jack:
+                return "jack"
+            case .queen:
+                return "queen"
+            case .king:
+                return "king"
+            default:
+                return String(self.rawValue)
         }
     }
 }
+
+let ace = Rank.ace
+let aceRawValue = ace.rawValue
+
+// Use `init?(rawValue:)` to make an instance of an enumeration from a raw value.
+// Returns either the enumeration case or nil.
+if let convertedRank = Rank(rawValue: 3) {
+    let threeDescription = convertedRank.simpleDescription()
+}
 ```
 
+- Read more about this example and update docs.
 
+```swift
+enum ServerResponse {
+    case result(String, String)
+    case failure(String)
+}
+
+let success = ServerResponse.result("6:00 am", "8:09 pm")
+let failure = ServerResponse.failure("Out of cheese.")
+
+switch success {
+    case let .result(sunrise, sunset):
+        print("Sunrise is at \(sunrise) and sunset is at \(sunset)")
+    case let .failure(message):
+        print("Failure... \(message)")
+}
+```
+
+# Structs
+
+- Structures are always copied when they're passed around in your code but classes are passed by reference.
+
+```swift
+struct Card {
+    var rank: Rank
+    var suit: Suit // also an enum but not shown in code above
+
+    func simpleDescription() -> String {
+        return "The \(rank.simpleDescription()) of \(suit.simpleDescription())"
+    }
+}
+
+let threeOfSpades = Card(rank: .three, suit: .spades)
+let threeOfSpadesDescription = threeOfSpades.simpleDescription()
+```
+
+- computed properties (not stored but computed)
